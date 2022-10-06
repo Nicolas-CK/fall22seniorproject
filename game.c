@@ -15,6 +15,10 @@
 #include "vrambuf.h"
 //#link "vrambuf.c"
 
+//defining
+#define FP_BITS 4
+
+
 // CHR Data
 //#resource "tileset.chr"
 //#link "tileset.s"
@@ -31,6 +35,10 @@
 const unsigned char palTitle[16]={ 0x0f,0x03,0x15,0x30,0x0f,0x01,0x21,0x31,0x0f,0x06,0x30,0x26,0x0f,0x09,0x19,0x29 };
 const unsigned char palLevel[16]={ 0x0f,0x03,0x15,0x30,0x0f,0x01,0x21,0x31,0x0f,0x06,0x30,0x26,0x0f,0x09,0x19,0x29 };
 
+//making characters
+static unsigned char wait;
+static unsigned char frame_cnt;
+static int iy,dy;
 
 ///// METASPRITES
 
@@ -174,11 +182,35 @@ void show_title() {
   
   // Enable Rendering
   ppu_on_all();
+  wait = 0;
+  frame_cnt=0;
+  iy=220<<FP_BITS;
   
-  while(1) {
+  while(1) 
+  {
     ppu_wait_frame();
     
     if (pad_trigger(0)&PAD_START) break;
+    
+    iy+=dy;
+    
+    if(iy<0)
+    {
+      iy = 0;
+      dy=-dy>>1;
+    }
+    
+    if(dy>(-8<<FP_BITS)) dy-=2;
+    
+    if(wait)
+    {
+      --wait;
+    }
+    else
+    {
+      pal_col(10,(frame_cnt&32)?0x0f:0x20);
+      ++frame_cnt;
+    }
   }
   
   fade_out();
